@@ -13,6 +13,10 @@ public class BookingRepository : IBookingRepository
     {
         _context = context;
     }
+    public async Task<IEnumerable<Booking>> GetAllAsync(CancellationToken ct)
+    {
+        return await _context.Bookings.ToListAsync(ct);
+    }
 
     public async Task AddAsync(Booking booking, CancellationToken ct)
     {

@@ -16,6 +16,11 @@ public class BookingService : IBookingService
         _flightRepository = flightRepo;
         _passengerRepository = passengerRepo;
     }
+    public async Task<IEnumerable<BookingDto>> GetAllBookingsAsync(CancellationToken ct)
+    {
+        var bookings = await _bookingRepository.GetAllAsync(ct);
+        return bookings.Select(MapToDto);
+    }
 
     public async Task<BookingDto> BookFlightAsync(CreateBookingDto dto, CancellationToken ct)
     {
@@ -35,7 +40,6 @@ public class BookingService : IBookingService
         }
         catch (Exception ex) when (ex.InnerException?.Message.Contains("UNIQUE constraint") == true || ex.Message.Contains("duplicate"))
         {
-            // Перехоплюємо конфлікт унікальності місця бази даних (залежить від провайдера БД)
             throw new InvalidOperationException($"Seat {dto.SeatNumber} is already booked on this flight.");
         }
 

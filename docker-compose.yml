@@ -1,18 +1,17 @@
 ﻿version: '3.8'
 
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: recipe_manager_db
+  postgres:
+    image: postgres:15-alpine
+    container_name: flight_booking_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: RecipeManagerDb
+      POSTGRES_PASSWORD: Password123!
+      POSTGRES_DB: FlightBookingDb
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - flight_db_data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  flight_db_data:

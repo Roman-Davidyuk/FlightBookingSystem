@@ -4,6 +4,7 @@ namespace Application.Interfaces.Services;
 
 public interface IBookingService
 {
+    Task<IEnumerable<BookingDto>> GetAllBookingsAsync(CancellationToken ct);
     Task<BookingDto> BookFlightAsync(CreateBookingDto dto, CancellationToken ct);
     Task<BookingDto> GetBookingAsync(Guid id, CancellationToken ct);
     Task CancelBookingAsync(Guid id, CancellationToken ct);
