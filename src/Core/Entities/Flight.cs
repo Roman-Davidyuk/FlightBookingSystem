@@ -38,6 +38,14 @@ public class Flight
     
     public Booking AddBooking(Passenger passenger, string seatNumber)
     {
+        if (passenger == null) throw new ArgumentNullException(nameof(passenger));
+
+        if (string.IsNullOrWhiteSpace(seatNumber)) 
+            throw new ArgumentException("Seat number cannot be empty.");
+            
+        if (_bookings.Any(b => b.SeatNumber == seatNumber && b.Status != BookingStatus.Cancelled))
+            throw new InvalidOperationException($"Seat {seatNumber} is already booked.");
+
         if (AvailableSeats <= 0)
             throw new InvalidOperationException("No available seats on this flight.");
 

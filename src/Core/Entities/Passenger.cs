@@ -21,8 +21,10 @@ public class Passenger
         if (string.IsNullOrWhiteSpace(lastName)) throw new ArgumentException("Last name is required.");
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@')) throw new ArgumentException("Valid email is required.");
         
-        if (string.IsNullOrWhiteSpace(passportNumber) || !Regex.IsMatch(passportNumber, "^[A-Z0-9]{6,9}$", RegexOptions.IgnoreCase))
-            throw new ArgumentException("Passport number must be valid (6-9 alphanumeric characters).");
+        if (string.IsNullOrWhiteSpace(passportNumber) || !Regex.IsMatch(passportNumber, @"^[A-Z]{2}\d{6}$"))
+        {
+            throw new ArgumentException("Invalid passport format. Must be 2 uppercase letters and 6 digits.", nameof(passportNumber));
+        }
 
         Id = Guid.NewGuid();
         FirstName = firstName;

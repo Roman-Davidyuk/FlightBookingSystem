@@ -32,6 +32,8 @@ public class FlightRepository : IFlightRepository
 
     public async Task<Flight?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _context.Flights.FindAsync(new object[] { id }, ct);
+        return await _context.Flights
+            .Include(f => f.Bookings) 
+            .FirstOrDefaultAsync(f => f.Id == id, ct);
     }
 }
