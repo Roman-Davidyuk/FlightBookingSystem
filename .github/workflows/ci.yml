@@ -7,8 +7,34 @@ on:
     branches: [ master ]
 
 jobs:
-  build-and-test:
-    name: Build, Test, and Verify
+  build:
+    name: 1. Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Project
+        run: dotnet build --configuration Release
+
+  code-tests:
+    name: 2. Code Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run Unit & Integration Tests
+        run: dotnet test --configuration Release --verbosity normal
+
+  performance-tests:
+    name: 3. Performance Tests (k6)
+    needs: code-tests
     runs-on: ubuntu-latest
 
     services:
@@ -27,38 +53,27 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      
-      - name: Setup .NET 10
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '8.0.x'
 
-      - name: Restore Dependencies
-        run: dotnet restore
-
-      - name: Build Project
-        run: dotnet build --no-restore --configuration Release
-      
-
-      - name: Run .NET Tests
-        run: dotnet test --no-build --configuration Release --verbosity normal
-      
       - name: Start API in Background
         run: |
           dotnet run --project src/Api --configuration Release &
-          sleep 15 # Даємо API 15 секунд на підняття та застосування міграцій бази
+          sleep 15
         env:
           ConnectionStrings__DefaultConnection: "Host=localhost;Database=flight_booking_test_db;Username=postgres;Password=TestPassword123!"
-      
-      - name: 🔧 Install k6
+
+      - name: Install k6
         run: |
           sudo gpg -k
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
-      
+
       - name: Run k6 Smoke Test
         run: k6 run tests/k6-tests/smoke.js
